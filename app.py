@@ -3,6 +3,7 @@ import requests
 from io import BytesIO
 from PIL import Image
 from fpdf import FPDF
+import io  # Necesario para BytesIO
 
 # Configuración de la página
 st.set_page_config(
@@ -302,17 +303,55 @@ else:
         pdf.set_font("Arial", "I", 10)
         pdf.cell(0, 6, "Apoyo comunitario de: SynergixLabs", ln=True)
 
-        # ✅ CORREGIDO: output() devuelve bytes → no necesita .encode()
-        return pdf.output(dest="S")  # Aquí estaba el error
+        # ✅ CORREGIDO: output() devuelve bytes → envuelto en BytesIO después
+        return pdf.output(dest="S")  # Ya no se usa .encode()
 
-    # --- BOTÓN DESCARGAR PDF ---
-    pdf_data = generar_pdf()
+    # --- GENERAR PDF Y CONVERTIR A BytesIO ---
+    pdf_data = generar_pdf()  # Devuelve bytes
+    pdf_bio = io.BytesIO(pdf_data)  # ✅ Streamlit acepta BytesIO
+
+    # --- BOTÓN DESCARGAR PDF (CORREGIDO) ---
     st.download_button(
         label="📄 Descargar resultados en PDF",
-        data=pdf_data,
+        data=pdf_bio,
         file_name="resultados_evaluacion_autismo.pdf",
-        mime="application/pdf"
+        mime="application/pdf",
+        key="download_pdf"
     )
+
+    # --- BOTÓN COMPARTIR EN WHATSAPP ---
+    mensaje_whatsapp = (
+        "Te comparto una herramienta gratuita de SynergixLabs para evaluar "
+        "rasgos del espectro autista en niños. Es orientativa, fácil de usar "
+        "y funciona desde cualquier celular, sin instalación:\n\n"
+        "https://evaluacion-autismo-wwvmf5ekxoxgdwrgmkb4am.streamlit.app\n\n"
+        "Ideal para padres, madres y maestros. \n\n"
+        "Con cariño, \nSynergixLabs 💙"
+    )
+
+    url_whatsapp = f"https://wa.me/?text={requests.utils.quote(mensaje_whatsapp)}"
+
+    st.markdown("""
+    ---
+    """)
+    st.markdown(f"""
+    <a href="{url_whatsapp}" target="_blank" style="
+        display: block;
+        text-align: center;
+        background-color: #25D366;
+        color: white;
+        padding: 12px 20px;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        width: 80%;
+        margin: 10px auto;
+        box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+    ">
+        💬 Compartir en WhatsApp
+    </a>
+    """, unsafe_allow_html=True)
 
     # --- BOTÓN REINICIAR ---
     if st.button("Realizar otra evaluación"):
