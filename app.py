@@ -1,22 +1,25 @@
 import streamlit as st
+import requests
+from io import BytesIO
+from PIL import Image
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Evaluación Autismo",
-    page_icon="❤️",  # Corazón rojo como ícono
+    page_title="Evaluación Autismo - SynergixLabs",
+    page_icon="❤️",
     layout="centered"
 )
 
-# Estilos CSS personalizados
+# Estilos CSS
 st.markdown("""
 <style>
     body {
-        background-color: #fffaf0; /* Fondo crema suave */
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #fffaf0;
+        font-family: 'Segoe UI', sans-serif;
         color: #2c3e50;
     }
     h1, h2, h3 {
-        color: #8e44ad; /* Morado suave */
+        color: #8e44ad;
         text-align: center;
     }
     .stButton>button {
@@ -31,17 +34,37 @@ st.markdown("""
         transform: scale(1.05);
         transition: 0.3s ease;
     }
-    .stProgress > div > div > div {
-        background-color: #e74c3c; /* Barra de progreso en rojo suave */
-    }
-    .css-1v0v1yh {
-        padding: 0rem 1rem;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# Título principal con corazón
-st.title("❤️ Evaluación de Rasgos del Espectro Autista")
+# --- LOGOS SUPERIORES: SynergixLabs (izquierda) y Corazón (centro) ---
+col1, col2, col3 = st.columns([1, 2, 1])
+
+# Logo de SynergixLabs (izquierda)
+try:
+    synergix_url = "https://raw.githubusercontent.com/synergixlabs/evaluacion-autismo/main/synergixlabs.png"
+    response = requests.get(synergix_url, timeout=10)
+    synergix_logo = Image.open(BytesIO(response.content))
+    with col1:
+        st.image(synergix_logo, width=140)
+except Exception as e:
+    with col1:
+        st.write("")
+
+# Corazón (centro)
+try:
+    corazon_url = "https://raw.githubusercontent.com/synergixlabs/evaluacion-autismo/main/corazon.png"
+    response = requests.get(corazon_url, timeout=10)
+    corazon_logo = Image.open(BytesIO(response.content))
+    with col2:
+        st.image(corazon_logo, width=160)
+except Exception as e:
+    with col2:
+        st.write("")
+
+# --- TÍTULO ---
+st.markdown("<h1 style='text-align: center;'>❤️ Evaluación de Rasgos del Espectro Autista</h1>", unsafe_allow_html=True)
+
 st.markdown("""
 <div style='text-align: center; margin-bottom: 20px;'>
     <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em><br>
@@ -134,7 +157,6 @@ else:
     total = len(preguntas)
     porcentaje = (st.session_state.puntaje / total) * 100
 
-    # Mostrar puntaje con color
     if porcentaje <= 20:
         st.success(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
         st.info("🔹 **Muy pocos indicadores**. El niño/a muestra pocos rasgos asociados al autismo.")
@@ -173,6 +195,22 @@ else:
         """)
 
     st.markdown("<div style='text-align: center; margin-top: 20px; font-size: 16px;'>Gracias por dedicar tiempo a entender mejor a este niño/a. ❤️</div>", unsafe_allow_html=True)
+
+    # --- PIE DE PÁGINA: Apoyo de SynergixLabs ---
+    st.markdown("---")
+    st.markdown("<div style='text-align: center; font-size: 16px;'>Esta herramienta es un apoyo comunitario de:</div>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    try:
+        synergix_url = "https://raw.githubusercontent.com/synergixlabs/evaluacion-autismo/main/synergixlabs.png"
+        response = requests.get(synergix_url, timeout=10)
+        synergix_logo = Image.open(BytesIO(response.content))
+        with col2:
+            st.image(synergix_logo, width=180)
+    except Exception as e:
+        st.markdown("<div style='text-align: center;'>SynergixLabs</div>", unsafe_allow_html=True)
+
+    st.markdown("<div style='text-align: center; font-size: 14px; color: #7f8c8d;'>Juntos por una comunidad más inclusiva. 💙</div>", unsafe_allow_html=True)
 
     # Botón para reiniciar
     if st.button("Realizar otra evaluación"):
