@@ -10,12 +10,22 @@ st.set_page_config(
     layout="centered"
 )
 
-# Estilos CSS personalizados (con colores)
+# --- OCULTAR ICONO ↔ ---
 st.markdown("""
 <style>
+    /* Ocultar el icono ↔ en títulos */
+    h1::after, h2::after, h3::after, h4::after, h5::after, h6::after {
+        content: none !important;
+        display: none !important;
+    }
+    /* Ocultar el expander de Streamlit */
+    .stExpander > div > div > span {
+        display: none !important;
+    }
+    /* Estilos generales */
     body {
         background-color: #fffaf0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', sans-serif;
         color: #2c3e50;
     }
     h1, h2, h3 {
@@ -125,7 +135,7 @@ preguntas = [
     "¿Prefiere jugar solo en lugar de con otros niños?",
     "¿Tiene intereses intensos y muy específicos?",
     "¿Se molesta mucho por cambios pequeños en la rutina?",
-    "¿Repite acciones o movimientos una y otra vez (aletear manos, balancearse)?",
+    "¿Repite acciones o movimientos una y otra vez (aletear manos, balanceándose)?",
     "¿Responde inusualmente a sonidos, texturas, olores o sabores?",
     "¿Tiene dificultad para adaptarse a cambios de ambiente?",
     "¿Tiene retrasos en el desarrollo del lenguaje?",
