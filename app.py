@@ -2,8 +2,6 @@ import streamlit as st
 import requests
 from io import BytesIO
 from PIL import Image
-from fpdf import FPDF
-import io  # Necesario para BytesIO
 
 # Configuración de la página
 st.set_page_config(
@@ -12,12 +10,12 @@ st.set_page_config(
     layout="centered"
 )
 
-# Estilos CSS personalizados
+# Estilos CSS
 st.markdown("""
 <style>
     body {
         background-color: #fffaf0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', sans-serif;
         color: #2c3e50;
     }
     h1, h2, h3 {
@@ -26,69 +24,59 @@ st.markdown("""
     }
     .stButton>button {
         border-radius: 12px;
-        padding: 12px 28px;
+        padding: 12px 24px;
         font-size: 16px;
         margin: 10px;
         width: 120px;
-        font-weight: bold;
     }
-    .stButton>button:hover {
-        transform: scale(1.05);
-        transition: 0.3s ease;
-    }
-    .stProgress > div > div > div {
-        background-color: #e74c3c;
+    .info-box {
+        background-color: #f8f9fa;
+        border-left: 5px solid #e74c3c;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        font-size: 14px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- TÍTULO CON CORAZÓN ---
-st.markdown("<h1 style='text-align: center; color: #8e44ad;'>❤️ Evaluación de Rasgos del Espectro Autista</h1>", unsafe_allow_html=True)
+# --- TÍTULO Y LOGO ---
+st.markdown("<h1 style='text-align: center;'>❤️ Evaluación de Rasgos del Espectro Autista</h1>", unsafe_allow_html=True)
 
-# --- LOGO DE SYNERGIXLABS CON ENLACE ---
+# Logo de SynergixLabs (clickeable)
 logo_url = "https://raw.githubusercontent.com/synergixlabs/evaluacion-autismo/main/synergixlabs.png"
 link_url = "https://github.com/synergixlabs"
 
 st.markdown(f"""
 <div style="text-align: center; margin: 20px 0;">
-    <a href="{link_url}" target="_blank" style="text-decoration: none;">
+    <a href="{link_url}" target="_blank">
         <img src="{logo_url}" alt="SynergixLabs" width="160" 
-             style="border-radius: 12px; 
-                    box-shadow: 0px 4px 8px rgba(0,0,0,0.1); 
-                    transition: transform 0.3s ease; 
-                    border: 2px solid #e74c3c;">
+             style="border-radius: 12px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1);">
     </a>
 </div>
-<script>
-    const img = document.querySelector('img[alt="SynergixLabs"]');
-    if (img) {{
-        img.addEventListener('mouseover', () => {{
-            img.style.transform = 'scale(1.08)';
-        }});
-        img.addEventListener('mouseout', () => {{
-            img.style.transform = 'scale(1)';
-        }});
-    }}
-</script>
 """, unsafe_allow_html=True)
 
-# --- ADVERTENCIA ---
 st.markdown("""
-<div style='text-align: center; margin-bottom: 20px; font-size: 14px; color: #7f8c8d;'>
-    <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em><br>
-    <strong>Dirigida a padres, madres y maestros.</strong>
+<div style='text-align: center; margin-bottom: 20px; color: #7f8c8d; font-size: 14px;'>
+    <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em>
 </div>
 """, unsafe_allow_html=True)
 
-# Selección de rol
+# --- DATOS DEL NIÑO/A ---
+st.subheader("Datos del niño/a")
+col1, col2 = st.columns(2)
+nombre = col1.text_input("Nombre del niño/a")
+edad = col2.number_input("Edad", min_value=1, max_value=18, value=5)
+
 rol = st.radio(
     "¿Quién está realizando la evaluación?",
     ("Padre / Tutor", "Maestro / Docente"),
-    index=0,
-    label_visibility="collapsed"
+    index=0
 )
 
-# Preguntas
+# --- PREGUNTAS ---
 preguntas = [
     "¿Evita el contacto visual o tiene dificultad para mantenerlo?",
     "¿Muestra expresiones faciales limitadas o inapropiadas?",
@@ -122,7 +110,7 @@ preguntas = [
     "¿Muestra poca variedad en actividades espontáneas?"
 ]
 
-# Inicializar variables
+# Inicializar respuestas
 if 'respuestas' not in st.session_state:
     st.session_state.respuestas = []
     st.session_state.indice = 0
@@ -142,7 +130,7 @@ if st.session_state.indice < len(preguntas):
 
     col1, col2 = st.columns(2)
     with col1:
-        si = st.button("✅ Sí", key=f"si_{st.session_state.indice}", type="primary")
+        si = st.button("✅ Sí", key=f"si_{st.session_state.indice}")
     with col2:
         no = st.button("❌ No", key=f"no_{st.session_state.indice}")
 
@@ -160,200 +148,97 @@ if st.session_state.indice < len(preguntas):
 # Mostrar resultados
 else:
     st.balloons()
-    st.header("📊 Resultados")
-    
+    st.header("📊 Resultados de la Evaluación")
+
+    # Mostrar datos del niño
+    st.markdown(f"**Nombre:** {nombre}")
+    st.markdown(f"**Edad:** {edad} años")
+    st.markdown(f"**Evaluado por:** {rol}")
+    st.markdown("---")
+
     total = len(preguntas)
     porcentaje = (st.session_state.puntaje / total) * 100
 
+    # Mostrar puntaje
+    st.markdown(f"**Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
+
+    # Nivel de riesgo
     if porcentaje <= 20:
-        st.success(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
-        st.info("🔹 **Muy pocos indicadores**. El niño/a muestra pocos rasgos asociados al autismo.")
-        nivel = "Muy pocos indicadores"
-        recomendaciones = """- El niño/a muestra pocos rasgos asociados al autismo.
-- Continúe observando su desarrollo con naturalidad.
-- Fomente el juego compartido y la comunicación.
-- No hay urgencia de intervención especializada por ahora."""
+        nivel = "Muy bajo riesgo"
+        color = "green"
     elif porcentaje <= 40:
-        st.info(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
-        st.warning("🔹 **Algunos rasgos, bajo riesgo**. Se recomienda observación continua.")
-        nivel = "Algunos rasgos, bajo riesgo"
-        recomendaciones = """- Se observan ciertos comportamientos que podrían relacionarse con el autismo.
-- Registre los comportamientos que le llaman la atención.
-- Hable con el pediatra o maestro para comparar observaciones.
-- Inicie rutinas visuales simples si hay dificultad con cambios."""
+        nivel = "Bajo riesgo"
+        color = "orange"
     elif porcentaje <= 60:
-        st.warning(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
-        st.error("🔹 **Riesgo moderado**. Se recomienda evaluación profesional.")
         nivel = "Riesgo moderado"
-        recomendaciones = """- El niño/a presenta varios rasgos asociados al espectro autista.
-- Se recomienda atención especializada para una evaluación más profunda.
-- Use pictogramas ARASAAC para mejorar la comprensión del lenguaje.
-- Establezca una rutina visual diaria."""
+        color = "orange"
     elif porcentaje <= 80:
-        st.error(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
-        st.markdown("🔹 **Alto riesgo**. Se recomienda evaluación profesional lo antes posible.")
         nivel = "Alto riesgo"
-        recomendaciones = """- Se observa un número significativo de rasgos del espectro autista.
-- Es muy recomendable una evaluación profesional lo antes posible.
-- Busque ayuda en centros de salud pública o programas de discapacidad.
-- Identifique intereses especiales y úselos como herramienta de aprendizaje."""
+        color = "red"
     else:
-        st.error(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)", icon="🚨")
-        st.markdown("🔹 **Muy alto riesgo**. Es altamente recomendable una evaluación completa.")
         nivel = "Muy alto riesgo"
-        recomendaciones = """- Se observa un patrón significativo de características del autismo.
-- Se recomienda una evaluación profesional inmediata.
-- Priorice la comunicación: use imágenes, gestos o aplicaciones simples.
-- Proteja al niño/a de situaciones de burla o exclusión."""
+        color = "red"
 
-    # --- APoyo HUMANO ---
-    st.markdown("---")
-    st.header("🌱 Apoyo para familias y educadores")
+    st.markdown(f"**Nivel de riesgo:** <span style='color:{color}; font-weight:bold;'>{nivel}</span>", unsafe_allow_html=True)
 
-    if rol == "Padre / Tutor":
-        st.markdown("""
-        - 📌 Lleve un diario de comportamientos y fortalezas.
-        - 📌 Use rutinas visuales en casa (levantarse, comer, dormir).
-        - 📌 Busque ayuda en centros de salud pública u ONGs.
-        - 📌 Únase a grupos de padres en Facebook o WhatsApp.
-        - 💡 **Recurso gratuito**: pictogramas ARASAAC (busque en Google).
-        """)
+    # Resultado para copiar
+    resultado_texto = f"""
+RESULTADO DE LA EVALUACIÓN
+----------------------------
+Nombre: {nombre}
+Edad: {edad} años
+Rol del evaluador: {rol}
+Puntaje: {st.session_state.puntaje}/{total}
+Porcentaje: {porcentaje:.1f}%
+Nivel de riesgo: {nivel}
+
+Recomendaciones:
+"""
+
+    if porcentaje <= 20:
+        resultado_texto += """
+- Muy pocos indicadores del espectro autista.
+- Continúe observando con naturalidad.
+- Fomente el juego compartido.
+"""
+    elif porcentaje <= 40:
+        resultado_texto += """
+- Algunos rasgos asociados al autismo.
+- Registre comportamientos para seguimiento.
+- Comparta sus observaciones con el pediatra.
+"""
+    elif porcentaje <= 60:
+        resultado_texto += """
+- Varios rasgos del espectro autista.
+- Se recomienda evaluación profesional.
+- Use rutinas visuales y pictogramas.
+"""
+    elif porcentaje <= 80:
+        resultado_texto += """
+- Patrón claro de rasgos del autismo.
+- Busque evaluación especializada.
+- Documente comportamientos para el especialista.
+"""
     else:
-        st.markdown("""
-        - 📌 Observe cómo sigue instrucciones y se relaciona con compañeros.
-        - 📌 Use pictogramas o tarjetas de emociones en clase.
-        - 📌 Asigne un compañero de apoyo amable.
-        - 📌 Comuníquese con los padres con empatía y respeto.
-        - 💡 **Recurso gratuito**: Canal 'Neuronilla' en YouTube.
-        """)
+        resultado_texto += """
+- Muy alto riesgo de trastorno del espectro autista.
+- Priorice una evaluación profesional inmediata.
+- Proteja al niño/a de situaciones de exclusión.
+"""
 
-    st.markdown("<div style='text-align: center; margin-top: 20px; font-size: 16px;'>Gracias por dedicar tiempo a entender mejor a este niño/a. ❤️</div>", unsafe_allow_html=True)
+    resultado_texto += "\nGracias por usar esta herramienta. SynergixLabs 💙"
 
-    # --- PIE DE PÁGINA: Apoyo de SynergixLabs ---
-    st.markdown("---")
-    st.markdown("<div style='text-align: center; font-size: 16px;'>Esta herramienta es un apoyo comunitario de:</div>", unsafe_allow_html=True)
+    # Mostrar resultado para copiar
+    st.markdown("### 📄 Copia este resultado (para imprimir o guardar):")
+    st.markdown(f"<div class='info-box'>{resultado_texto}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div style="text-align: center; margin: 15px 0;">
-        <a href="{link_url}" target="_blank" style="text-decoration: none;">
-            <img src="{logo_url}" alt="SynergixLabs" width="180" 
-                 style="border-radius: 12px; 
-                        box-shadow: 0px 4px 8px rgba(0,0,0,0.1); 
-                        transition: transform 0.3s ease; 
-                        border: 2px solid #e74c3c;">
-        </a>
+    st.markdown("""
+    <div style="text-align: center; margin: 20px 0; color: #7f8c8d; font-size: 14px;">
+        Puedes seleccionar todo el texto, copiarlo (Ctrl+C) y pegarlo en un documento de Word o PDF.
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div style='text-align: center; font-size: 14px; color: #7f8c8d;'>Juntos por una comunidad más inclusiva. 💙</div>", unsafe_allow_html=True)
-
-    # --- GENERAR PDF CON LOGO ---
-    def generar_pdf():
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_auto_page_break(auto=True, margin=15)
-
-        # Insertar logo desde URL
-        try:
-            response = requests.get(logo_url, timeout=10)
-            response.raise_for_status()
-            img = Image.open(BytesIO(response.content))
-            img_byte_arr = BytesIO()
-            img.save(img_byte_arr, format='PNG')
-            img_byte_arr.seek(0)
-            pdf.image(img_byte_arr, x=10, y=10, w=60)
-        except Exception as e:
-            pass  # No detener si falla el logo
-
-        # Título
-        pdf.set_font("Arial", "B", 16)
-        pdf.set_text_color(142, 68, 173)
-        pdf.cell(0, 10, "Evaluación de Rasgos del Espectro Autista", ln=True, align="C")
-        pdf.ln(20)
-
-        # Información
-        pdf.set_font("Arial", "", 12)
-        pdf.set_text_color(0, 0, 0)
-        pdf.cell(0, 8, f"Rol: {rol}", ln=True)
-        pdf.cell(0, 8, f"Puntaje: {st.session_state.puntaje}/{total}", ln=True)
-        pdf.cell(0, 8, f"Porcentaje: {porcentaje:.1f}%", ln=True)
-        pdf.cell(0, 8, f"Nivel: {nivel}", ln=True)
-        pdf.ln(10)
-
-        # Recomendaciones
-        pdf.set_font("Arial", "B", 12)
-        pdf.set_text_color(231, 76, 60)
-        pdf.cell(0, 8, "Recomendaciones:", ln=True)
-        pdf.set_font("Arial", "", 11)
-        pdf.set_text_color(0, 0, 0)
-
-        for line in recomendaciones.split("\n"):
-            if line.strip():
-                pdf.cell(0, 7, line.strip(), ln=True)
-
-        pdf.ln(10)
-
-        # Apoyo
-        pdf.set_font("Arial", "I", 10)
-        pdf.set_text_color(127, 140, 141)
-        pdf.multi_cell(0, 6, "Esta evaluación es orientativa. El diagnóstico debe ser realizado por un profesional de la salud.")
-
-        pdf.ln(5)
-        pdf.set_text_color(44, 62, 80)
-        pdf.set_font("Arial", "I", 10)
-        pdf.cell(0, 6, "Apoyo comunitario de: SynergixLabs", ln=True)
-
-        # ✅ CORREGIDO: output() devuelve bytes → envuelto en BytesIO después
-        return pdf.output(dest="S")  # Ya no se usa .encode()
-
-    # --- GENERAR PDF Y CONVERTIR A BytesIO ---
-    pdf_data = generar_pdf()  # Devuelve bytes
-    pdf_bio = io.BytesIO(pdf_data)  # ✅ Streamlit acepta BytesIO
-
-    # --- BOTÓN DESCARGAR PDF (CORREGIDO) ---
-    st.download_button(
-        label="📄 Descargar resultados en PDF",
-        data=pdf_bio,
-        file_name="resultados_evaluacion_autismo.pdf",
-        mime="application/pdf",
-        key="download_pdf"
-    )
-
-    # --- BOTÓN COMPARTIR EN WHATSAPP ---
-    mensaje_whatsapp = (
-        "Te comparto una herramienta gratuita de SynergixLabs para evaluar "
-        "rasgos del espectro autista en niños. Es orientativa, fácil de usar "
-        "y funciona desde cualquier celular, sin instalación:\n\n"
-        "https://evaluacion-autismo-wwvmf5ekxoxgdwrgmkb4am.streamlit.app\n\n"
-        "Ideal para padres, madres y maestros. \n\n"
-        "Con cariño, \nSynergixLabs 💙"
-    )
-
-    url_whatsapp = f"https://wa.me/?text={requests.utils.quote(mensaje_whatsapp)}"
-
-    st.markdown("""
-    ---
-    """)
-    st.markdown(f"""
-    <a href="{url_whatsapp}" target="_blank" style="
-        display: block;
-        text-align: center;
-        background-color: #25D366;
-        color: white;
-        padding: 12px 20px;
-        text-decoration: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        width: 80%;
-        margin: 10px auto;
-        box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-    ">
-        💬 Compartir en WhatsApp
-    </a>
-    """, unsafe_allow_html=True)
-
-    # --- BOTÓN REINICIAR ---
+    # Botón para reiniciar
     if st.button("Realizar otra evaluación"):
         st.session_state.clear()
         st.rerun()
