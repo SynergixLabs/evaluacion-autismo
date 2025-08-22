@@ -1,27 +1,63 @@
 import streamlit as st
-import time
 
 # Configuración de la página
 st.set_page_config(
-    page_title="🧠 Evaluación Autismo",
-    page_icon="🧠",
+    page_title="Evaluación Autismo",
+    page_icon="❤️",  # Corazón rojo como ícono
     layout="centered"
 )
 
-# Título principal
-st.title("🧠 Evaluación de Rasgos del Espectro Autista")
+# Estilos CSS personalizados
 st.markdown("""
-Esta herramienta es **orientativa** y no sustituye un diagnóstico profesional.  
-Dirigida a padres, madres y maestros.
-""")
+<style>
+    body {
+        background-color: #fffaf0; /* Fondo crema suave */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #2c3e50;
+    }
+    h1, h2, h3 {
+        color: #8e44ad; /* Morado suave */
+        text-align: center;
+    }
+    .stButton>button {
+        border-radius: 12px;
+        padding: 12px 28px;
+        font-size: 16px;
+        margin: 10px;
+        width: 120px;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        transform: scale(1.05);
+        transition: 0.3s ease;
+    }
+    .stProgress > div > div > div {
+        background-color: #e74c3c; /* Barra de progreso en rojo suave */
+    }
+    .css-1v0v1yh {
+        padding: 0rem 1rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Título principal con corazón
+st.title("❤️ Evaluación de Rasgos del Espectro Autista")
+st.markdown("""
+<div style='text-align: center; margin-bottom: 20px;'>
+    <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em><br>
+    <strong>Dirigida a padres, madres y maestros.</strong>
+</div>
+""", unsafe_allow_html=True)
 
 # Selección de rol
 rol = st.radio(
     "¿Quién está realizando la evaluación?",
-    ("Padre / Tutor", "Maestro / Docente")
+    ("Padre / Tutor", "Maestro / Docente"),
+    index=0,
+    label_visibility="collapsed"
 )
 
-# Preguntas (sin caracteres problemáticos, en UTF-8)
+# Preguntas
 preguntas = [
     "¿Evita el contacto visual o tiene dificultad para mantenerlo?",
     "¿Muestra expresiones faciales limitadas o inapropiadas?",
@@ -55,7 +91,7 @@ preguntas = [
     "¿Muestra poca variedad en actividades espontáneas?"
 ]
 
-# Inicializar variables en session_state
+# Inicializar variables
 if 'respuestas' not in st.session_state:
     st.session_state.respuestas = []
     st.session_state.indice = 0
@@ -75,7 +111,7 @@ if st.session_state.indice < len(preguntas):
 
     col1, col2 = st.columns(2)
     with col1:
-        si = st.button("✅ Sí", key=f"si_{st.session_state.indice}")
+        si = st.button("✅ Sí", key=f"si_{st.session_state.indice}", type="primary")
     with col2:
         no = st.button("❌ No", key=f"no_{st.session_state.indice}")
 
@@ -115,7 +151,7 @@ else:
         st.error(f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)", icon="🚨")
         st.markdown("🔹 **Muy alto riesgo**. Es altamente recomendable una evaluación completa.")
 
-    # Mensaje de apoyo humano
+    # Apoyo humano
     st.markdown("---")
     st.header("🌱 Apoyo para familias y educadores")
 
@@ -123,7 +159,7 @@ else:
         st.markdown("""
         - 📌 Lleve un diario de comportamientos y fortalezas.
         - 📌 Use rutinas visuales en casa (levantarse, comer, dormir).
-        - 📌 Busque ayuda en centros de salud pública o ONGs.
+        - 📌 Busque ayuda en centros de salud pública u ONGs.
         - 📌 Únase a grupos de padres en Facebook o WhatsApp.
         - 💡 **Recurso gratuito**: pictogramas ARASAAC (busque en Google).
         """)
@@ -136,7 +172,7 @@ else:
         - 💡 **Recurso gratuito**: Canal 'Neuronilla' en YouTube.
         """)
 
-    st.markdown("Gracias por dedicar tiempo a entender mejor a este niño/a. 💙")
+    st.markdown("<div style='text-align: center; margin-top: 20px; font-size: 16px;'>Gracias por dedicar tiempo a entender mejor a este niño/a. ❤️</div>", unsafe_allow_html=True)
 
     # Botón para reiniciar
     if st.button("Realizar otra evaluación"):
