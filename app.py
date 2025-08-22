@@ -302,70 +302,19 @@ else:
         pdf.set_font("Arial", "I", 10)
         pdf.cell(0, 6, "Apoyo comunitario de: SynergixLabs", ln=True)
 
-        return pdf.output(dest="S")
+        # ✅ CORREGIDO: output() devuelve bytes → no necesita .encode()
+        return pdf.output(dest="S")  # Aquí estaba el error
 
     # --- BOTÓN DESCARGAR PDF ---
-    def generar_pdf():
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-
-    # Insertar logo desde URL
-    try:
-        response = requests.get(logo_url, timeout=10)
-        response.raise_for_status()
-        img = Image.open(BytesIO(response.content))
-        img_byte_arr = BytesIO()
-        img.save(img_byte_arr, format='PNG')
-        img_byte_arr.seek(0)
-        pdf.image(img_byte_arr, x=10, y=10, w=60)
-    except Exception as e:
-        pass  # No detener si falla el logo
-
-    # Título
-    pdf.set_font("Arial", "B", 16)
-    pdf.set_text_color(142, 68, 173)
-    pdf.cell(0, 10, "Evaluación de Rasgos del Espectro Autista", ln=True, align="C")
-    pdf.ln(20)
-
-    # Información
-    pdf.set_font("Arial", "", 12)
-    pdf.set_text_color(0, 0, 0)
-    pdf.cell(0, 8, f"Rol: {rol}", ln=True)
-    pdf.cell(0, 8, f"Puntaje: {st.session_state.puntaje}/{total}", ln=True)
-    pdf.cell(0, 8, f"Porcentaje: {porcentaje:.1f}%", ln=True)
-    pdf.cell(0, 8, f"Nivel: {nivel}", ln=True)
-    pdf.ln(10)
-
-    # Recomendaciones
-    pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(231, 76, 60)
-    pdf.cell(0, 8, "Recomendaciones:", ln=True)
-    pdf.set_font("Arial", "", 11)
-    pdf.set_text_color(0, 0, 0)
-
-    for line in recomendaciones.split("\n"):
-        if line.strip():
-            pdf.cell(0, 7, line.strip(), ln=True)
-
-    pdf.ln(10)
-
-    # Apoyo
-    pdf.set_font("Arial", "I", 10)
-    pdf.set_text_color(127, 140, 141)
-    pdf.multi_cell(0, 6, "Esta evaluación es orientativa. El diagnóstico debe ser realizado por un profesional de la salud.")
-
-    pdf.ln(5)
-    pdf.set_text_color(44, 62, 80)
-    pdf.set_font("Arial", "I", 10)
-    pdf.cell(0, 6, "Apoyo comunitario de: SynergixLabs", ln=True)
-
-    # ✅ CORREGIDO: output() ya devuelve bytes
-    return pdf.output(dest="S")
+    pdf_data = generar_pdf()
+    st.download_button(
+        label="📄 Descargar resultados en PDF",
+        data=pdf_data,
+        file_name="resultados_evaluacion_autismo.pdf",
+        mime="application/pdf"
     )
 
     # --- BOTÓN REINICIAR ---
     if st.button("Realizar otra evaluación"):
         st.session_state.clear()
         st.rerun()
-
