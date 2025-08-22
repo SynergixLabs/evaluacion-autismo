@@ -10,12 +10,12 @@ st.set_page_config(
     layout="centered"
 )
 
-# Estilos CSS
+# Estilos CSS personalizados (con colores)
 st.markdown("""
 <style>
     body {
         background-color: #fffaf0;
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         color: #2c3e50;
     }
     h1, h2, h3 {
@@ -24,20 +24,60 @@ st.markdown("""
     }
     .stButton>button {
         border-radius: 12px;
-        padding: 12px 24px;
+        padding: 12px 28px;
         font-size: 16px;
         margin: 10px;
         width: 120px;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        transform: scale(1.05);
+        transition: 0.3s ease;
+    }
+    .stProgress > div > div > div {
+        background-color: #e74c3c;
     }
     .info-box {
         background-color: #f8f9fa;
-        border-left: 5px solid #e74c3c;
-        padding: 15px;
+        border-left: 6px solid #e74c3c;
+        padding: 16px;
         margin: 20px 0;
         border-radius: 8px;
-        font-family: monospace;
+        font-family: 'Courier New', monospace;
         white-space: pre-wrap;
-        font-size: 14px;
+        font-size: 15px;
+        color: #2c3e50;
+    }
+    .success-box {
+        background-color: #dfffdf;
+        border-left: 6px solid #27ae60;
+        padding: 16px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        font-size: 15px;
+    }
+    .warning-box {
+        background-color: #fff9e6;
+        border-left: 6px solid #f39c12;
+        padding: 16px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        font-size: 15px;
+    }
+    .danger-box {
+        background-color: #ffe6e6;
+        border-left: 6px solid #c0392b;
+        padding: 16px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        font-size: 15px;
+        color: #c0392b;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -65,15 +105,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- DATOS DEL NIÑO/A ---
-st.subheader("Datos del niño/a")
+st.subheader("📋 Datos del niño/a")
 col1, col2 = st.columns(2)
-nombre = col1.text_input("Nombre del niño/a")
+nombre = col1.text_input("Nombre del niño/a", placeholder="Ej: Juan")
 edad = col2.number_input("Edad", min_value=1, max_value=18, value=5)
 
 rol = st.radio(
     "¿Quién está realizando la evaluación?",
     ("Padre / Tutor", "Maestro / Docente"),
-    index=0
+    index=0,
+    label_visibility="collapsed"
 )
 
 # --- PREGUNTAS ---
@@ -130,7 +171,7 @@ if st.session_state.indice < len(preguntas):
 
     col1, col2 = st.columns(2)
     with col1:
-        si = st.button("✅ Sí", key=f"si_{st.session_state.indice}")
+        si = st.button("✅ Sí", key=f"si_{st.session_state.indice}", type="primary")
     with col2:
         no = st.button("❌ No", key=f"no_{st.session_state.indice}")
 
@@ -150,44 +191,49 @@ else:
     st.balloons()
     st.header("📊 Resultados de la Evaluación")
 
-    # Mostrar datos del niño
-    st.markdown(f"**Nombre:** {nombre}")
-    st.markdown(f"**Edad:** {edad} años")
-    st.markdown(f"**Evaluado por:** {rol}")
+    # Datos del niño
+    st.markdown(f"**👤 Nombre:** {nombre}")
+    st.markdown(f"**🎂 Edad:** {edad} años")
+    st.markdown(f"**🧑‍💼 Evaluado por:** {rol}")
     st.markdown("---")
 
     total = len(preguntas)
     porcentaje = (st.session_state.puntaje / total) * 100
 
-    # Mostrar puntaje
-    st.markdown(f"**Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
-
-    # Nivel de riesgo
+    # Mostrar puntaje con color
     if porcentaje <= 20:
+        st.success(f"✅ **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
+        st.info("🔹 **Muy bajo riesgo.** El niño/a muestra pocos rasgos asociados al autismo.")
         nivel = "Muy bajo riesgo"
-        color = "green"
+        box_class = "success-box"
     elif porcentaje <= 40:
+        st.info(f"🟡 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
+        st.warning("🔹 **Bajo riesgo.** Se recomienda observación continua.")
         nivel = "Bajo riesgo"
-        color = "orange"
+        box_class = "warning-box"
     elif porcentaje <= 60:
+        st.warning(f"🟠 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
+        st.error("🔹 **Riesgo moderado.** Se recomienda evaluación profesional.")
         nivel = "Riesgo moderado"
-        color = "orange"
+        box_class = "warning-box"
     elif porcentaje <= 80:
+        st.error(f"🔴 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
+        st.markdown("🔹 **Alto riesgo.** Se recomienda evaluación profesional lo antes posible.")
         nivel = "Alto riesgo"
-        color = "red"
+        box_class = "danger-box"
     else:
+        st.error(f"🚨 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
+        st.markdown("🔹 **Muy alto riesgo.** Es altamente recomendable una evaluación completa.")
         nivel = "Muy alto riesgo"
-        color = "red"
+        box_class = "danger-box"
 
-    st.markdown(f"**Nivel de riesgo:** <span style='color:{color}; font-weight:bold;'>{nivel}</span>", unsafe_allow_html=True)
-
-    # Resultado para copiar
+    # --- RESULTADO PARA COPIAR ---
     resultado_texto = f"""
-RESULTADO DE LA EVALUACIÓN
-----------------------------
+RESULTADO DE LA EVALUACIÓN - SYNERGIXLABS
+==========================================
 Nombre: {nombre}
 Edad: {edad} años
-Rol del evaluador: {rol}
+Evaluado por: {rol}
 Puntaje: {st.session_state.puntaje}/{total}
 Porcentaje: {porcentaje:.1f}%
 Nivel de riesgo: {nivel}
@@ -199,46 +245,51 @@ Recomendaciones:
         resultado_texto += """
 - Muy pocos indicadores del espectro autista.
 - Continúe observando con naturalidad.
-- Fomente el juego compartido.
+- Fomente el juego compartido y la comunicación.
+- No hay urgencia de intervención especializada.
 """
     elif porcentaje <= 40:
         resultado_texto += """
 - Algunos rasgos asociados al autismo.
-- Registre comportamientos para seguimiento.
-- Comparta sus observaciones con el pediatra.
+- Registre los comportamientos que le llaman la atención.
+- Hable con el pediatra o maestro.
+- Inicie rutinas visuales simples.
 """
     elif porcentaje <= 60:
         resultado_texto += """
 - Varios rasgos del espectro autista.
-- Se recomienda evaluación profesional.
-- Use rutinas visuales y pictogramas.
+- Se recomienda atención especializada.
+- Use pictogramas ARASAAC.
+- Establezca una rutina visual diaria.
 """
     elif porcentaje <= 80:
         resultado_texto += """
-- Patrón claro de rasgos del autismo.
-- Busque evaluación especializada.
-- Documente comportamientos para el especialista.
+- Número significativo de rasgos del autismo.
+- Es muy recomendable una evaluación profesional.
+- Busque ayuda en centros de salud pública.
+- Identifique intereses especiales y úselos.
 """
     else:
         resultado_texto += """
-- Muy alto riesgo de trastorno del espectro autista.
-- Priorice una evaluación profesional inmediata.
+- Patrón claro de características del autismo.
+- Se recomienda una evaluación profesional inmediata.
+- Priorice la comunicación: imágenes, gestos, apps.
 - Proteja al niño/a de situaciones de exclusión.
 """
 
-    resultado_texto += "\nGracias por usar esta herramienta. SynergixLabs 💙"
+    resultado_texto += "\n\nGracias por usar esta herramienta.\nSynergixLabs 💙"
 
-    # Mostrar resultado para copiar
-    st.markdown("### 📄 Copia este resultado (para imprimir o guardar):")
-    st.markdown(f"<div class='info-box'>{resultado_texto}</div>", unsafe_allow_html=True)
+    # Mostrar resultado con color
+    st.markdown("### 📄 Copia este resultado (para guardar o imprimir):")
+    st.markdown(f"<div class='{box_class}'>{resultado_texto}</div>", unsafe_allow_html=True)
 
     st.markdown("""
     <div style="text-align: center; margin: 20px 0; color: #7f8c8d; font-size: 14px;">
-        Puedes seleccionar todo el texto, copiarlo (Ctrl+C) y pegarlo en un documento de Word o PDF.
+        🔽 Puedes seleccionar todo el texto, copiarlo (Ctrl+C) y pegarlo en un documento de Word o PDF.
     </div>
     """, unsafe_allow_html=True)
 
-    # Botón para reiniciar
-    if st.button("Realizar otra evaluación"):
+    # --- BOTÓN REINICIAR ---
+    if st.button("🔄 Realizar otra evaluación"):
         st.session_state.clear()
         st.rerun()
