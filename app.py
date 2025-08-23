@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- OCULTAR ICONO ↔ ---
+# --- OCULTAR ICONO ↔ Y ESTILOS ---
 st.markdown("""
 <style>
     /* Ocultar el icono ↔ en títulos */
@@ -88,6 +88,50 @@ st.markdown("""
         white-space: pre-wrap;
         font-size: 15px;
         color: #c0392b;
+    }
+
+    /* Estilos para impresión */
+    @media print {
+        /* Ocultar todo lo que no queremos imprimir */
+        .stApp header,
+        .stApp .stButton,
+        .stApp .stSidebar,
+        .stApp .stExpander,
+        .stApp footer,
+        .stApp .block-container > div:first-child {
+            display: none !important;
+        }
+
+        /* Mostrar solo el contenido del informe */
+        .print-only {
+            display: block !important;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Asegurar que todo se vea bien en papel */
+        body, .stApp {
+            background-color: white !important;
+            color: black !important;
+        }
+
+        /* Ajustar tamaño de fuentes */
+        h1, h2, h3 {
+            color: #8e44ad !important;
+        }
+
+        /* Ajustar márgenes de la página impresa */
+        @page {
+            margin: 1cm;
+        }
+    }
+
+    /* Ocultar el contenido normal en impresión */
+    @media print {
+        .stApp .block-container {
+            display: none;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -299,7 +343,86 @@ Recomendaciones:
     </div>
     """, unsafe_allow_html=True)
 
-    # --- BOTÓN REINICIAR ---
-    if st.button("🔄 Realizar otra evaluación"):
+    # --- INFORME PARA IMPRESIÓN ---
+    informe_html = f"""
+    <div class="print-only">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="{logo_url}" alt="SynergixLabs" style="width: 180px; height: auto;">
+            <h1 style="color: #8e44ad;">❤️ Evaluación de Rasgos del Espectro Autista</h1>
+            <p style="color: #7f8c8d; font-size: 14px;">
+                <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em>
+            </p>
+        </div>
+
+        <!-- LEYENDA DE ADVERTENCIA -->
+        <div style="
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 12px 20px;
+            border: 2px solid #ffeeba;
+            border-radius: 8px;
+            margin: 10px 0 20px 0;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        ">
+            ⚠️ <strong>Advertencia:</strong> Esta evaluación es orientativa y no sustituye un diagnóstico profesional. 
+            El diagnóstico del Trastorno del Espectro Autista debe ser realizado por un especialista en salud mental o desarrollo infantil.
+        </div>
+
+        <hr style="border: 1px solid #e74c3c; margin: 20px 0;">
+
+        <h3>📋 Datos del niño/a</h3>
+        <p><strong>Nombre:</strong> {nombre}</p>
+        <p><strong>Edad:</strong> {edad} años</p>
+        <p><strong>Evaluado por:</strong> {rol}</p>
+
+        <h3>📊 Resultados</h3>
+        <p><strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)</p>
+        <p><strong>Nivel de riesgo:</strong> <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">{nivel}</span></p>
+
+        <h3>🌱 Recomendaciones</h3>
+        <pre style="background-color: #f8f9fa; padding: 15px; border-left: 5px solid #e74c3c; border-radius: 8px; font-family: Arial; white-space: pre-wrap; color: #2c3e50;">
+{resultado_texto}
+        </pre>
+
+        <div style="text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 14px;">
+            <p>Gracias por usar esta herramienta.<br>
+            <strong>SynergixLabs 💙</strong></p>
+        </div>
+    </div>
+    """
+
+    st.markdown(informe_html, unsafe_allow_html=True)
+
+    # --- BOTÓN DE IMPRIMIR (FUNCIONAL) ---
+    st.markdown("""
+    <a href="javascript:window.print()" style="text-decoration: none;">
+        <div style="
+            text-align: center;
+            background-color: #27ae60;
+            color: white;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0px 6px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 80%;
+            margin: 20px auto;
+        "
+        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 8px 16px rgba(0,0,0,0.2)';"
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 6px 12px rgba(0,0,0,0.1)';"
+        onclick="window.print(); return false;"
+        >
+        🖨 Imprimir resultado profesional
+        </div>
+    </a>
+    """, unsafe_allow_html=True)
+
+    # --- BOTÓN REINICIAR (FUNCIONAL) ---
+    if st.button("🔄 Realizar otra evaluación", key="reiniciar"):
         st.session_state.clear()
         st.rerun()
