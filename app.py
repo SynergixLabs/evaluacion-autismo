@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 from io import BytesIO
 from PIL import Image
+import time
+from datetime import datetime
 
 # Configuración de la página
 st.set_page_config(
@@ -92,45 +94,32 @@ st.markdown("""
 
     /* Estilos para impresión */
     @media print {
-        /* Ocultar todo lo que no queremos imprimir */
         .stApp header,
+        .stApp footer,
         .stApp .stButton,
         .stApp .stSidebar,
         .stApp .stExpander,
-        .stApp footer,
         .stApp .block-container > div:first-child {
             display: none !important;
         }
-
-        /* Mostrar solo el contenido del informe */
+        .block-container {
+            display: none !important;
+        }
         .print-only {
             display: block !important;
             margin: 0;
             padding: 20px;
             font-family: 'Arial', sans-serif;
         }
-
-        /* Asegurar que todo se vea bien en papel */
         body, .stApp {
             background-color: white !important;
             color: black !important;
         }
-
-        /* Ajustar tamaño de fuentes */
         h1, h2, h3 {
             color: #8e44ad !important;
         }
-
-        /* Ajustar márgenes de la página impresa */
         @page {
             margin: 1cm;
-        }
-    }
-
-    /* Ocultar el contenido normal en impresión */
-    @media print {
-        .stApp .block-container {
-            display: none;
         }
     }
 </style>
@@ -343,52 +332,119 @@ Recomendaciones:
     </div>
     """, unsafe_allow_html=True)
 
+    # --- GENERAR FOLIO Y FECHA ---
+    folio = int(time.time()) % 10000
+    fecha_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+
     # --- INFORME PARA IMPRESIÓN ---
     informe_html = f"""
     <div class="print-only">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <img src="{logo_url}" alt="SynergixLabs" style="width: 180px; height: auto;">
-            <h1 style="color: #8e44ad;">❤️ Evaluación de Rasgos del Espectro Autista</h1>
-            <p style="color: #7f8c8d; font-size: 14px;">
+        <div style="text-align: center; margin-bottom: 10px;">
+            <img src="{logo_url}" alt="SynergixLabs" style="width: 160px; height: auto;">
+            <h1 style="color: #8e44ad; margin: 10px 0;">❤️ Evaluación de Rasgos del Espectro Autista</h1>
+            <p style="color: #7f8c8d; font-size: 13px; margin: 5px 0;">
                 <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em>
             </p>
+        </div>
+
+        <!-- FOLIO Y FECHA -->
+        <div style="
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #2c3e50;
+            margin: 10px 0 15px 0;
+            flex-wrap: wrap;
+        ">
+            <div style="font-weight: bold;">
+                📄 <strong>Folio:</strong> #{folio}
+            </div>
+            <div style="font-weight: bold;">
+                📅 <strong>Fecha:</strong> {fecha_hora}
+            </div>
         </div>
 
         <!-- LEYENDA DE ADVERTENCIA -->
         <div style="
             background-color: #fff3cd;
             color: #856404;
-            padding: 12px 20px;
+            padding: 10px 15px;
             border: 2px solid #ffeeba;
             border-radius: 8px;
-            margin: 10px 0 20px 0;
-            font-size: 14px;
+            margin: 10px 0 15px 0;
+            font-size: 13px;
             font-weight: bold;
             text-align: center;
+            line-height: 1.4;
         ">
             ⚠️ <strong>Advertencia:</strong> Esta evaluación es orientativa y no sustituye un diagnóstico profesional. 
-            El diagnóstico del Trastorno del Espectro Autista debe ser realizado por un especialista en salud mental o desarrollo infantil.
+            El diagnóstico debe ser realizado por un especialista.
         </div>
 
-        <hr style="border: 1px solid #e74c3c; margin: 20px 0;">
+        <hr style="border: 1px solid #e74c3c; margin: 15px 0;">
 
-        <h3>📋 Datos del niño/a</h3>
-        <p><strong>Nombre:</strong> {nombre}</p>
-        <p><strong>Edad:</strong> {edad} años</p>
-        <p><strong>Evaluado por:</strong> {rol}</p>
+        <div style="font-size: 14px; line-height: 1.4;">
+            <strong>📋 Datos del niño/a</strong>
+            <p style="margin: 5px 0; padding: 0;">
+                <strong>Nombre:</strong> {nombre}
+            </p>
+            <p style="margin: 5px 0; padding: 0;">
+                <strong>Edad:</strong> {edad} años
+            </p>
+            <p style="margin: 5px 0; padding: 0;">
+                <strong>Evaluado por:</strong> {rol}
+            </p>
 
-        <h3>📊 Resultados</h3>
-        <p><strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)</p>
-        <p><strong>Nivel de riesgo:</strong> <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">{nivel}</span></p>
+            <strong>📊 Resultados</strong>
+            <p style="margin: 5px 0; padding: 0;">
+                <strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)
+            </p>
+            <p style="margin: 5px 0; padding: 0;">
+                <strong>Nivel de riesgo:</strong> 
+                <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">
+                    {nivel}
+                </span>
+            </p>
 
-        <h3>🌱 Recomendaciones</h3>
-        <pre style="background-color: #f8f9fa; padding: 15px; border-left: 5px solid #e74c3c; border-radius: 8px; font-family: Arial; white-space: pre-wrap; color: #2c3e50;">
-{resultado_texto}
-        </pre>
+            <strong>🌱 Recomendaciones</strong>
+            <div style="background-color: #f8f9fa; padding: 12px; border-left: 5px solid #e74c3c; border-radius: 6px; 
+                        font-family: Arial; font-size: 14px; line-height: 1.5; color: #2c3e50;">
+                {resultado_texto.strip()}
+            </div>
+        </div>
 
-        <div style="text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 14px;">
-            <p>Gracias por usar esta herramienta.<br>
-            <strong>SynergixLabs 💙</strong></p>
+        <!-- CÓDIGO QR -->
+        <div style="margin-top: 30px; text-align: center;">
+            <div style="font-size: 14px; color: #2c3e50; font-weight: bold; margin-bottom: 8px;">
+                Escanea para acceder a la herramienta
+            </div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fsynergixlabs-evaluacion-autismo.streamlit.app&size=200x200&margin=10"
+                 alt="Código QR"
+                 style="width: 150px; height: 150px; border: 2px solid #e74c3c; border-radius: 8px;">
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 6px;">
+                synergixlabs-evaluacion-autismo.streamlit.app
+            </div>
+        </div>
+
+        <!-- ESPACIO PARA FIRMA -->
+        <div style="text-align: center; margin-top: 30px; font-size: 14px;">
+            <p style="margin: 5px 0;"><strong>SynergixLabs 💙</strong></p>
+            
+            <div style="margin-top: 40px; font-size: 14px;">
+                <div style="border-bottom: 1px solid #000; width: 300px; margin: 0 auto 8px; line-height: 0.8;">&nbsp;</div>
+                <div style="color: #2c3e50; font-weight: bold;">Firma del evaluador</div>
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-weight: bold;">
+                    <div>
+                        Nombre: 
+                        <span style="border-bottom: 1px solid #000; width: 250px; padding: 0 10px; display: inline-block;"></span>
+                    </div>
+                    <div>
+                        Fecha: 
+                        <span style="border-bottom: 1px solid #000; width: 120px; padding: 0 10px; display: inline-block;"></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     """
