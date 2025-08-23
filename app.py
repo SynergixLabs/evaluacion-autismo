@@ -235,7 +235,10 @@ else:
     st.header("📊 Resultados de la Evaluación")
 
     # Datos del niño
-    st.markdown(f"**👤 Nombre:** {nombre}")
+    if nombre:
+        st.markdown(f"**👤 Nombre:** {nombre}")
+    else:
+        st.markdown("**👤 Nombre:** No especificado")
     st.markdown(f"**🎂 Edad:** {edad} años")
     st.markdown(f"**🧑‍💼 Evaluado por:** {rol}")
     st.markdown("---")
@@ -274,7 +277,7 @@ else:
     resultado_texto = f"""
 RESULTADO DE LA EVALUACIÓN - SYNERGIXLABS
 ==========================================
-Nombre: {nombre}
+Nombre: {nombre if nombre else 'No especificado'}
 Edad: {edad} años
 Evaluado por: {rol}
 Puntaje: {st.session_state.puntaje}/{total}
@@ -322,7 +325,7 @@ Recomendaciones:
 
     resultado_texto += "\n\nGracias por usar esta herramienta.\nSynergixLabs 💙"
 
-    # Mostrar resultado con color
+    # Mostrar resultado para copiar
     st.markdown("### 📄 Copia este resultado (para guardar o imprimir):")
     st.markdown(f"<div class='{box_class}'>{resultado_texto}</div>", unsafe_allow_html=True)
 
@@ -348,110 +351,60 @@ Recomendaciones:
         </div>
 
         <!-- FOLIO Y FECHA -->
-        <div style="
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            font-size: 14px;
-            color: #2c3e50;
-            margin: 10px 0 15px 0;
-            flex-wrap: wrap;
-        ">
-            <div style="font-weight: bold;">
-                📄 <strong>Folio:</strong> #{folio}
-            </div>
-            <div style="font-weight: bold;">
-                📅 <strong>Fecha:</strong> {fecha_hora}
-            </div>
+        <div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; color: #2c3e50; margin: 10px 0 15px 0; flex-wrap: wrap;">
+            <div style="font-weight: bold;">📄 <strong>Folio:</strong> #{folio}</div>
+            <div style="font-weight: bold;">📅 <strong>Fecha:</strong> {fecha_hora}</div>
         </div>
 
         <!-- LEYENDA DE ADVERTENCIA -->
-        <div style="
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px 15px;
-            border: 2px solid #ffeeba;
-            border-radius: 8px;
-            margin: 10px 0 15px 0;
-            font-size: 13px;
-            font-weight: bold;
-            text-align: center;
-            line-height: 1.4;
-        ">
-            ⚠️ <strong>Advertencia:</strong> Esta evaluación es orientativa y no sustituye un diagnóstico profesional. 
-            El diagnóstico debe ser realizado por un especialista.
+        <div style="background-color: #fff3cd; color: #856404; padding: 10px 15px; border: 2px solid #ffeeba; border-radius: 8px; margin: 10px 0 15px 0; font-size: 13px; font-weight: bold; text-align: center; line-height: 1.4;">
+            ⚠️ <strong>Advertencia:</strong> Esta evaluación es orientativa y no sustituye un diagnóstico profesional. El diagnóstico debe ser realizado por un especialista.
         </div>
 
         <hr style="border: 1px solid #e74c3c; margin: 15px 0;">
 
         <div style="font-size: 14px; line-height: 1.4;">
             <strong>📋 Datos del niño/a</strong>
-            <p style="margin: 5px 0; padding: 0;">
-                <strong>Nombre:</strong> {nombre}
-            </p>
-            <p style="margin: 5px 0; padding: 0;">
-                <strong>Edad:</strong> {edad} años
-            </p>
-            <p style="margin: 5px 0; padding: 0;">
-                <strong>Evaluado por:</strong> {rol}
-            </p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Nombre:</strong> {nombre if nombre else 'No especificado'}</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Edad:</strong> {edad} años</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Evaluado por:</strong> {rol}</p>
 
             <strong>📊 Resultados</strong>
-            <p style="margin: 5px 0; padding: 0;">
-                <strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)
-            </p>
-            <p style="margin: 5px 0; padding: 0;">
-                <strong>Nivel de riesgo:</strong> 
-                <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">
-                    {nivel}
-                </span>
-            </p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Nivel de riesgo:</strong> <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">{nivel}</span></p>
 
             <strong>🌱 Recomendaciones</strong>
-            <div style="background-color: #f8f9fa; padding: 12px; border-left: 5px solid #e74c3c; border-radius: 6px; 
-                        font-family: Arial; font-size: 14px; line-height: 1.5; color: #2c3e50;">
+            <div style="background-color: #f8f9fa; padding: 12px; border-left: 5px solid #e74c3c; border-radius: 6px; font-family: Arial; font-size: 14px; line-height: 1.5; color: #2c3e50;">
                 {resultado_texto.strip()}
             </div>
         </div>
 
         <!-- CÓDIGO QR -->
         <div style="margin-top: 30px; text-align: center;">
-            <div style="font-size: 14px; color: #2c3e50; font-weight: bold; margin-bottom: 8px;">
-                Escanea para acceder a la herramienta
-            </div>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fsynergixlabs-evaluacion-autismo.streamlit.app&size=200x200&margin=10"
-                 alt="Código QR"
-                 style="width: 150px; height: 150px; border: 2px solid #e74c3c; border-radius: 8px;">
-            <div style="font-size: 12px; color: #7f8c8d; margin-top: 6px;">
-                synergixlabs-evaluacion-autismo.streamlit.app
-            </div>
+            <div style="font-size: 14px; color: #2c3e50; font-weight: bold; margin-bottom: 8px;">Escanea para acceder a la herramienta</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fsynergixlabs-evaluacion-autismo.streamlit.app&size=200x200&margin=10" alt="Código QR" style="width: 150px; height: 150px; border: 2px solid #e74c3c; border-radius: 8px;">
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 6px;">synergixlabs-evaluacion-autismo.streamlit.app</div>
         </div>
 
         <!-- ESPACIO PARA FIRMA -->
         <div style="text-align: center; margin-top: 30px; font-size: 14px;">
             <p style="margin: 5px 0;"><strong>SynergixLabs 💙</strong></p>
-            
             <div style="margin-top: 40px; font-size: 14px;">
                 <div style="border-bottom: 1px solid #000; width: 300px; margin: 0 auto 8px; line-height: 0.8;">&nbsp;</div>
                 <div style="color: #2c3e50; font-weight: bold;">Firma del evaluador</div>
                 <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-weight: bold;">
-                    <div>
-                        Nombre: 
-                        <span style="border-bottom: 1px solid #000; width: 250px; padding: 0 10px; display: inline-block;"></span>
-                    </div>
-                    <div>
-                        Fecha: 
-                        <span style="border-bottom: 1px solid #000; width: 120px; padding: 0 10px; display: inline-block;"></span>
-                    </div>
+                    <div>Nombre: <span style="border-bottom: 1px solid #000; width: 250px; padding: 0 10px; display: inline-block;"></span></div>
+                    <div>Fecha: <span style="border-bottom: 1px solid #000; width: 120px; padding: 0 10px; display: inline-block;"></span></div>
                 </div>
             </div>
         </div>
     </div>
     """
 
+    # Renderizar el informe imprimible
     st.markdown(informe_html, unsafe_allow_html=True)
 
-    # --- BOTÓN DE IMPRIMIR (FUNCIONAL) ---
+    # --- BOTÓN DE IMPRIMIR ---
     st.markdown("""
     <a href="javascript:window.print()" style="text-decoration: none;">
         <div style="
@@ -478,7 +431,7 @@ Recomendaciones:
     </a>
     """, unsafe_allow_html=True)
 
-    # --- BOTÓN REINICIAR (FUNCIONAL) ---
+    # --- BOTÓN REINICIAR ---
     if st.button("🔄 Realizar otra evaluación", key="reiniciar"):
         st.session_state.clear()
         st.rerun()
