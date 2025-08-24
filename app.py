@@ -273,6 +273,33 @@ else:
         nivel = "Muy alto riesgo"
         box_class = "danger-box"
 
+    # --- RECOMENDACIONES (solo para el informe) ---
+    if porcentaje <= 20:
+        recomendaciones = """- Muy pocos indicadores del espectro autista.
+- Continúe observando con naturalidad.
+- Fomente el juego compartido y la comunicación.
+- No hay urgencia de intervención especializada."""
+    elif porcentaje <= 40:
+        recomendaciones = """- Algunos rasgos asociados al autismo.
+- Registre los comportamientos que le llaman la atención.
+- Hable con el pediatra o maestro.
+- Inicie rutinas visuales simples."""
+    elif porcentaje <= 60:
+        recomendaciones = """- Varios rasgos del espectro autista.
+- Se recomienda atención especializada.
+- Use pictogramas ARASAAC.
+- Establezca una rutina visual diaria."""
+    elif porcentaje <= 80:
+        recomendaciones = """- Número significativo de rasgos del autismo.
+- Es muy recomendable una evaluación profesional.
+- Busque ayuda en centros de salud pública.
+- Identifique intereses especiales y úselos."""
+    else:
+        recomendaciones = """- Patrón claro de características del autismo.
+- Se recomienda una evaluación profesional inmediata.
+- Priorice la comunicación: imágenes, gestos, apps.
+- Proteja al niño/a de situaciones de exclusión."""
+
     # --- RESULTADO PARA COPIAR ---
     resultado_texto = f"""
 RESULTADO DE LA EVALUACIÓN - SYNERGIXLABS
@@ -285,45 +312,11 @@ Porcentaje: {porcentaje:.1f}%
 Nivel de riesgo: {nivel}
 
 Recomendaciones:
-"""
+{recomendaciones}
 
-    if porcentaje <= 20:
-        resultado_texto += """
-- Muy pocos indicadores del espectro autista.
-- Continúe observando con naturalidad.
-- Fomente el juego compartido y la comunicación.
-- No hay urgencia de intervención especializada.
+Gracias por usar esta herramienta.
+SynergixLabs 💙
 """
-    elif porcentaje <= 40:
-        resultado_texto += """
-- Algunos rasgos asociados al autismo.
-- Registre los comportamientos que le llaman la atención.
-- Hable con el pediatra o maestro.
-- Inicie rutinas visuales simples.
-"""
-    elif porcentaje <= 60:
-        resultado_texto += """
-- Varios rasgos del espectro autista.
-- Se recomienda atención especializada.
-- Use pictogramas ARASAAC.
-- Establezca una rutina visual diaria.
-"""
-    elif porcentaje <= 80:
-        resultado_texto += """
-- Número significativo de rasgos del autismo.
-- Es muy recomendable una evaluación profesional.
-- Busque ayuda en centros de salud pública.
-- Identifique intereses especiales y úselos.
-"""
-    else:
-        resultado_texto += """
-- Patrón claro de características del autismo.
-- Se recomienda una evaluación profesional inmediata.
-- Priorice la comunicación: imágenes, gestos, apps.
-- Proteja al niño/a de situaciones de exclusión.
-"""
-
-    resultado_texto += "\n\nGracias por usar esta herramienta.\nSynergixLabs 💙"
 
     # Mostrar resultado para copiar
     st.markdown("### 📄 Copia este resultado (para guardar o imprimir):")
@@ -340,7 +333,7 @@ Recomendaciones:
     fecha_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # --- INFORME PARA IMPRESIÓN ---
-    informe_html = f"""
+    informe_html = f'''
     <div class="print-only">
         <div style="text-align: center; margin-bottom: 10px;">
             <img src="{logo_url}" alt="SynergixLabs" style="width: 160px; height: auto;">
@@ -375,7 +368,7 @@ Recomendaciones:
 
             <strong>🌱 Recomendaciones</strong>
             <div style="background-color: #f8f9fa; padding: 12px; border-left: 5px solid #e74c3c; border-radius: 6px; font-family: Arial; font-size: 14px; line-height: 1.5; color: #2c3e50;">
-                {resultado_texto.strip()}
+{recomendaciones}
             </div>
         </div>
 
@@ -399,9 +392,9 @@ Recomendaciones:
             </div>
         </div>
     </div>
-    """
+    '''
 
-    # Renderizar el informe imprimible
+    # Renderizar el informe
     st.markdown(informe_html, unsafe_allow_html=True)
 
     # --- BOTÓN DE IMPRIMIR ---
