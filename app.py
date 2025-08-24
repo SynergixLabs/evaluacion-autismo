@@ -354,16 +354,11 @@ SynergixLabs 💙
                 text.textLine(line.strip())
         c.drawText(text)
 
-        # --- QR ---
+        # --- QR (CORREGIDO) ---
         web_link = "https://synergixlabs-evaluacion-autismo.streamlit.app"
         qr_code = qr.QrCodeWidget(web_link)
-        bounds = qr_code.getBounds()
-        size = 100
-        width_qr = bounds[2] - bounds[0]
-        height_qr = bounds[3] - bounds[1]
-        d = qr_code.draw()
-        d.scale(size / width_qr, size / height_qr)
-        d.drawOn(c, width - 150, 80)
+        qr_code.barHeight = qr_code.barWidth = 100  # Tamaño del QR
+        qr_code.drawOn(c, width - 150, 80)  # ✅ Ahora sí funciona
 
         # --- Enlace clickeable ---
         c.setFont("Helvetica", 9)
