@@ -1,14 +1,8 @@
 import streamlit as st
-import requests
 from io import BytesIO
 from PIL import Image
 import time
 from datetime import datetime
-import io
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.graphics.barcode import qr
 
 # Configuración de la página
 st.set_page_config(
@@ -224,55 +218,28 @@ else:
     if porcentaje <= 20:
         st.success(f"✅ **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
         st.info("🔹 **Muy bajo riesgo.** El niño/a muestra pocos rasgos asociados al autismo.")
-        nivel = "Muy bajo"
+        nivel = "Muy bajo riesgo"
         box_class = "success-box"
     elif porcentaje <= 40:
         st.info(f"🟡 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
         st.warning("🔹 **Bajo riesgo.** Se recomienda observación continua.")
-        nivel = "Bajo"
+        nivel = "Bajo riesgo"
         box_class = "warning-box"
     elif porcentaje <= 60:
         st.warning(f"🟠 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
         st.error("🔹 **Riesgo moderado.** Se recomienda evaluación profesional.")
-        nivel = "Moderado"
+        nivel = "Riesgo moderado"
         box_class = "warning-box"
     elif porcentaje <= 80:
         st.error(f"🔴 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
         st.markdown("🔹 **Alto riesgo.** Se recomienda evaluación profesional lo antes posible.")
-        nivel = "Alto"
+        nivel = "Alto riesgo"
         box_class = "danger-box"
     else:
         st.error(f"🚨 **Puntaje:** {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
         st.markdown("🔹 **Muy alto riesgo.** Es altamente recomendable una evaluación completa.")
-        nivel = "Muy alto"
+        nivel = "Muy alto riesgo"
         box_class = "danger-box"
-
-    # --- RECOMENDACIONES (para el PDF) ---
-    if porcentaje <= 20:
-        recomendaciones = """- Muy pocos indicadores del espectro autista.
-- Continúe observando con naturalidad.
-- Fomente el juego compartido y la comunicación.
-- No hay urgencia de intervención especializada."""
-    elif porcentaje <= 40:
-        recomendaciones = """- Algunos rasgos asociados al autismo.
-- Registre los comportamientos que le llaman la atención.
-- Hable con el pediatra o maestro.
-- Inicie rutinas visuales simples."""
-    elif porcentaje <= 60:
-        recomendaciones = """- Varios rasgos del espectro autista.
-- Se recomienda atención especializada.
-- Use pictogramas ARASAAC.
-- Establezca una rutina visual diaria."""
-    elif porcentaje <= 80:
-        recomendaciones = """- Número significativo de rasgos del autismo.
-- Es muy recomendable una evaluación profesional.
-- Busque ayuda en centros de salud pública.
-- Identifique intereses especiales y úselos."""
-    else:
-        recomendaciones = """- Patrón claro de características del autismo.
-- Se recomienda una evaluación profesional inmediata.
-- Priorice la comunicación: imágenes, gestos, apps.
-- Proteja al niño/a de situaciones de exclusión."""
 
     # --- RESULTADO PARA COPIAR ---
     resultado_texto = f"""
@@ -286,12 +253,47 @@ Porcentaje: {porcentaje:.1f}%
 Nivel de riesgo: {nivel}
 
 Recomendaciones:
-{recomendaciones}
-
-Gracias por usar esta herramienta.
-SynergixLabs 💙
 """
 
+    if porcentaje <= 20:
+        resultado_texto += """
+- Muy pocos indicadores del espectro autista.
+- Continúe observando con naturalidad.
+- Fomente el juego compartido y la comunicación.
+- No hay urgencia de intervención especializada.
+"""
+    elif porcentaje <= 40:
+        resultado_texto += """
+- Algunos rasgos asociados al autismo.
+- Registre los comportamientos que le llaman la atención.
+- Hable con el pediatra o maestro.
+- Inicie rutinas visuales simples.
+"""
+    elif porcentaje <= 60:
+        resultado_texto += """
+- Varios rasgos del espectro autista.
+- Se recomienda atención especializada.
+- Use pictogramas ARASAAC.
+- Establezca una rutina visual diaria.
+"""
+    elif porcentaje <= 80:
+        resultado_texto += """
+- Número significativo de rasgos del autismo.
+- Es muy recomendable una evaluación profesional.
+- Busque ayuda en centros de salud pública.
+- Identifique intereses especiales y úselos.
+"""
+    else:
+        resultado_texto += """
+- Patrón claro de características del autismo.
+- Se recomienda una evaluación profesional inmediata.
+- Priorice la comunicación: imágenes, gestos, apps.
+- Proteja al niño/a de situaciones de exclusión.
+"""
+
+    resultado_texto += "\n\nGracias por usar esta herramienta.\nSynergixLabs 💙"
+
+    # Mostrar resultado con color
     st.markdown("### 📄 Copia este resultado (para guardar o imprimir):")
     st.markdown(f"<div class='{box_class}'>{resultado_texto}</div>", unsafe_allow_html=True)
 
@@ -301,90 +303,101 @@ SynergixLabs 💙
     </div>
     """, unsafe_allow_html=True)
 
-    # --- GENERAR FOLIO ---
+    # --- GENERAR FOLIO Y FECHA ---
     folio = int(time.time()) % 10000
     fecha_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    # --- GENERAR PDF INTERACTIVO ---
-    def generar_pdf():
-        buffer = io.BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
+    # --- INFORME PARA IMPRESIÓN (solo al imprimir) ---
+    informe_html = f'''
+    <div class="print-only">
+        <div style="text-align: center; margin-bottom: 10px;">
+            <img src="{logo_url}" alt="SynergixLabs" style="width: 160px; height: auto;">
+            <h1 style="color: #8e44ad; margin: 10px 0;">❤️ Evaluación de Rasgos del Espectro Autista</h1>
+            <p style="color: #7f8c8d; font-size: 13px; margin: 5px 0;">
+                <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em>
+            </p>
+        </div>
 
-        # --- Encabezado ---
-        c.setFillColor(colors.HexColor("#8e44ad"))
-        c.setFont("Helvetica-Bold", 18)
-        c.drawCentredString(width / 2, height - 80, "❤️ Evaluación de Rasgos del Espectro Autista")
-        c.setFont("Helvetica", 10)
-        c.setFillColor(colors.grey)
-        c.drawCentredString(width / 2, height - 100, "Orientativa – No sustituye diagnóstico profesional")
-        c.setFillColor(colors.black)
+        <!-- FOLIO Y FECHA -->
+        <div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; color: #2c3e50; margin: 10px 0 15px 0; flex-wrap: wrap;">
+            <div style="font-weight: bold;">📄 <strong>Folio:</strong> #{folio}</div>
+            <div style="font-weight: bold;">📅 <strong>Fecha:</strong> {fecha_hora}</div>
+        </div>
 
-        # --- Información del niño ---
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, height - 140, f"📄 Folio: #{folio}")
-        c.drawString(250, height - 140, f"📅 Fecha: {fecha_hora}")
-        c.drawString(50, height - 160, f"👤 Nombre: {nombre if nombre else 'No especificado'}")
-        c.drawString(250, height - 160, f"🎂 Edad: {edad} años")
-        c.drawString(450, height - 160, f"🧑‍ Evaluado por: {rol}")
+        <!-- LEYENDA DE ADVERTENCIA -->
+        <div style="background-color: #fff3cd; color: #856404; padding: 10px 15px; border: 2px solid #ffeeba; border-radius: 8px; margin: 10px 0 15px 0; font-size: 13px; font-weight: bold; text-align: center; line-height: 1.4;">
+            ⚠️ <strong>Advertencia:</strong> Esta evaluación es orientativa y no sustituye un diagnóstico profesional. El diagnóstico debe ser realizado por un especialista.
+        </div>
 
-        # --- Resultados ---
-        c.setStrokeColor(colors.HexColor("#e74c3c"))
-        c.setLineWidth(1)
-        c.rect(45, height - 320, width - 90, 140, fill=0)
+        <hr style="border: 1px solid #e74c3c; margin: 15px 0;">
 
-        c.setFont("Helvetica-Bold", 12)
-        c.setFillColor(colors.HexColor("#2980B9"))
-        c.drawString(60, height - 300, "📊 Resultados")
-        c.setFont("Helvetica", 11)
-        c.setFillColor(colors.black)
-        c.drawString(80, height - 320, f"Puntaje: {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)")
-        c.setFillColor(colors.red if nivel in ["Alto", "Muy alto"] else 
-                       colors.orange if nivel == "Moderado" else colors.green)
-        c.drawString(80, height - 340, f"Nivel de riesgo: {nivel}")
+        <div style="font-size: 14px; line-height: 1.4;">
+            <strong>📋 Datos del niño/a</strong>
+            <p style="margin: 5px 0; padding: 0;"><strong>Nombre:</strong> {nombre if nombre else 'No especificado'}</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Edad:</strong> {edad} años</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Evaluado por:</strong> {rol}</p>
 
-        # --- Recomendaciones ---
-        c.setFillColor(colors.HexColor("#27AE60"))
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(60, height - 370, "🌱 Recomendaciones")
-        text = c.beginText(80, height - 390)
-        text.setFont("Helvetica", 10)
-        for line in recomendaciones.split("\n"):
-            if line.strip():
-                text.textLine(line.strip())
-        c.drawText(text)
+            <strong>📊 Resultados</strong>
+            <p style="margin: 5px 0; padding: 0;"><strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Nivel de riesgo:</strong> <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">{nivel}</span></p>
 
-        # --- QR (CORREGIDO) ---
-        web_link = "https://synergixlabs-evaluacion-autismo.streamlit.app"
-        qr_code = qr.QrCodeWidget(web_link)
-        qr_code.barHeight = qr_code.barWidth = 100  # Tamaño del QR
-        qr_code.drawOn(c, width - 150, 80)  # ✅ Ahora sí funciona
+            <strong>🌱 Recomendaciones</strong>
+            <div style="background-color: #f8f9fa; padding: 12px; border-left: 5px solid #e74c3c; border-radius: 6px; font-family: Arial; font-size: 14px; line-height: 1.5; color: #2c3e50;">
+{resultado_texto.strip()}
+            </div>
+        </div>
 
-        # --- Enlace clickeable ---
-        c.setFont("Helvetica", 9)
-        c.setFillColor(colors.HexColor("#2980B9"))
-        c.drawString(50, 70, web_link)
-        c.linkURL(web_link, (50, 65, 300, 80), relative=1)
+        <!-- CÓDIGO QR -->
+        <div style="margin-top: 30px; text-align: center;">
+            <div style="font-size: 14px; color: #2c3e50; font-weight: bold; margin-bottom: 8px;">Escanea para acceder a la herramienta</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fsynergixlabs-evaluacion-autismo.streamlit.app&size=200x200&margin=10" alt="Código QR" style="width: 150px; height: 150px; border: 2px solid #e74c3c; border-radius: 8px;">
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 6px;">synergixlabs-evaluacion-autismo.streamlit.app</div>
+        </div>
 
-        # --- Firma ---
-        c.setFillColor(colors.black)
-        c.drawString(50, 40, "_________________________")
-        c.drawString(70, 25, "Firma del evaluador")
+        <!-- ESPACIO PARA FIRMA -->
+        <div style="text-align: center; margin-top: 30px; font-size: 14px;">
+            <p style="margin: 5px 0;"><strong>SynergixLabs 💙</strong></p>
+            <div style="margin-top: 40px; font-size: 14px;">
+                <div style="border-bottom: 1px solid #000; width: 300px; margin: 0 auto 8px; line-height: 0.8;">&nbsp;</div>
+                <div style="color: #2c3e50; font-weight: bold;">Firma del evaluador</div>
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-weight: bold;">
+                    <div>Nombre: <span style="border-bottom: 1px solid #000; width: 250px; padding: 0 10px; display: inline-block;"></span></div>
+                    <div>Fecha: <span style="border-bottom: 1px solid #000; width: 120px; padding: 0 10px; display: inline-block;"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    '''
 
-        # --- Guardar PDF ---
-        c.save()
-        buffer.seek(0)
-        return buffer
+    # Renderizar el informe
+    st.markdown(informe_html, unsafe_allow_html=True)
 
-    # --- BOTÓN DESCARGAR PDF ---
-    pdf_buffer = generar_pdf()
-
-    st.download_button(
-        label="📥 Descargar PDF profesional (QR + enlace)",
-        data=pdf_buffer,
-        file_name=f"evaluacion_autismo_{folio}.pdf",
-        mime="application/pdf"
-    )
+    # --- BOTÓN DE IMPRIMIR ---
+    st.markdown("""
+    <a href="javascript:window.print()" style="text-decoration: none;">
+        <div style="
+            text-align: center;
+            background-color: #27ae60;
+            color: white;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0px 6px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: inline-block;
+            width: 80%;
+            margin: 20px auto;
+        "
+        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 8px 16px rgba(0,0,0,0.2)';"
+        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 6px 12px rgba(0,0,0,0.1)';"
+        onclick="window.print(); return false;"
+        >
+        🖨 Imprimir resultado profesional
+        </div>
+    </a>
+    """, unsafe_allow_html=True)
 
     # --- BOTÓN REINICIAR ---
     if st.button("🔄 Realizar otra evaluación", key="reiniciar"):
