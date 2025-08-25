@@ -190,12 +190,12 @@ if st.session_state.indice < len(preguntas):
         st.session_state.respuestas.append("SI")
         st.session_state.puntaje += 1
         st.session_state.indice += 1
-        st.rerun()
+        st.experimental_rerun()  # ✅ Corregido para Streamlit 1.23.1
 
     if no:
         st.session_state.respuestas.append("NO")
         st.session_state.indice += 1
-        st.rerun()
+        st.experimental_rerun()  # ✅ Corregido para Streamlit 1.23.1
 
 # Mostrar resultados
 else:
@@ -429,4 +429,4 @@ Recomendaciones:
     # --- BOTÓN REINICIAR ---
     if st.button("🔄 Realizar otra evaluación", key="reiniciar"):
         st.session_state.clear()
-        st.rerun()
+        st.experimental_rerun()  # ✅ Corregido aquí también
