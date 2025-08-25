@@ -293,7 +293,7 @@ Recomendaciones:
 
     resultado_texto += "\n\nGracias por usar esta herramienta.\nSynergixLabs 💙"
 
-    # Mostrar resultado con color
+    # Mostrar resultado para copiar
     st.markdown("### 📄 Copia este resultado (para guardar o imprimir):")
     st.markdown(f"<div class='{box_class}'>{resultado_texto}</div>", unsafe_allow_html=True)
 
@@ -307,11 +307,38 @@ Recomendaciones:
     folio = int(time.time()) % 10000
     fecha_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    # --- INFORME PARA IMPRESIÓN (solo al imprimir) ---
-    informe_html = f'''
+    # --- RECOMENDACIONES (solo para el informe) ---
+    if porcentaje <= 20:
+        recomendaciones = """- Muy pocos indicadores del espectro autista.
+- Continúe observando con naturalidad.
+- Fomente el juego compartido y la comunicación.
+- No hay urgencia de intervención especializada."""
+    elif porcentaje <= 40:
+        recomendaciones = """- Algunos rasgos asociados al autismo.
+- Registre los comportamientos que le llaman la atención.
+- Hable con el pediatra o maestro.
+- Inicie rutinas visuales simples."""
+    elif porcentaje <= 60:
+        recomendaciones = """- Varios rasgos del espectro autista.
+- Se recomienda atención especializada.
+- Use pictogramas ARASAAC.
+- Establezca una rutina visual diaria."""
+    elif porcentaje <= 80:
+        recomendaciones = """- Número significativo de rasgos del autismo.
+- Es muy recomendable una evaluación profesional.
+- Busque ayuda en centros de salud pública.
+- Identifique intereses especiales y úselos."""
+    else:
+        recomendaciones = """- Patrón claro de características del autismo.
+- Se recomienda una evaluación profesional inmediata.
+- Priorice la comunicación: imágenes, gestos, apps.
+- Proteja al niño/a de situaciones de exclusión."""
+
+    # --- INFORME PARA IMPRESIÓN (CORREGIDO) ---
+    informe_html = '''
     <div class="print-only">
         <div style="text-align: center; margin-bottom: 10px;">
-            <img src="{logo_url}" alt="SynergixLabs" style="width: 160px; height: auto;">
+            <img src="''' + logo_url + '''" alt="SynergixLabs" style="width: 160px; height: auto;">
             <h1 style="color: #8e44ad; margin: 10px 0;">❤️ Evaluación de Rasgos del Espectro Autista</h1>
             <p style="color: #7f8c8d; font-size: 13px; margin: 5px 0;">
                 <em>Esta herramienta es orientativa y no sustituye un diagnóstico profesional.</em>
@@ -320,8 +347,8 @@ Recomendaciones:
 
         <!-- FOLIO Y FECHA -->
         <div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; color: #2c3e50; margin: 10px 0 15px 0; flex-wrap: wrap;">
-            <div style="font-weight: bold;">📄 <strong>Folio:</strong> #{folio}</div>
-            <div style="font-weight: bold;">📅 <strong>Fecha:</strong> {fecha_hora}</div>
+            <div style="font-weight: bold;">📄 <strong>Folio:</strong> #''' + str(folio) + '''</div>
+            <div style="font-weight: bold;">📅 <strong>Fecha:</strong> ''' + fecha_hora + '''</div>
         </div>
 
         <!-- LEYENDA DE ADVERTENCIA -->
@@ -333,17 +360,17 @@ Recomendaciones:
 
         <div style="font-size: 14px; line-height: 1.4;">
             <strong>📋 Datos del niño/a</strong>
-            <p style="margin: 5px 0; padding: 0;"><strong>Nombre:</strong> {nombre if nombre else 'No especificado'}</p>
-            <p style="margin: 5px 0; padding: 0;"><strong>Edad:</strong> {edad} años</p>
-            <p style="margin: 5px 0; padding: 0;"><strong>Evaluado por:</strong> {rol}</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Nombre:</strong> ''' + (nombre if nombre else 'No especificado') + '''</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Edad:</strong> ''' + str(edad) + ''' años</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Evaluado por:</strong> ''' + rol + '''</p>
 
             <strong>📊 Resultados</strong>
-            <p style="margin: 5px 0; padding: 0;"><strong>Puntaje:</strong> {st.session_state.puntaje}/{total} ({porcentaje:.1f}%)</p>
-            <p style="margin: 5px 0; padding: 0;"><strong>Nivel de riesgo:</strong> <span style="color: {'#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b'}; font-weight: bold;">{nivel}</span></p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Puntaje:</strong> ''' + str(st.session_state.puntaje) + '''/''' + str(total) + ''' (''' + f"{porcentaje:.1f}" + '''%)</p>
+            <p style="margin: 5px 0; padding: 0;"><strong>Nivel de riesgo:</strong> <span style="color: ''' + ('#27ae60' if porcentaje <= 20 else '#f39c12' if porcentaje <= 60 else '#c0392b') + '''; font-weight: bold;">''' + nivel + '''</span></p>
 
             <strong>🌱 Recomendaciones</strong>
             <div style="background-color: #f8f9fa; padding: 12px; border-left: 5px solid #e74c3c; border-radius: 6px; font-family: Arial; font-size: 14px; line-height: 1.5; color: #2c3e50;">
-{resultado_texto.strip()}
+''' + recomendaciones + '''
             </div>
         </div>
 
